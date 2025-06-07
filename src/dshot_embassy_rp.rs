@@ -1,22 +1,21 @@
-use dshot_encoder as dshot;
 pub use super::DshotPioTrait;
+use dshot_encoder as dshot;
 
 use embassy_rp::{
-    pio::{ Instance, Pio, Config, PioPin, ShiftConfig, ShiftDirection::Left, InterruptHandler},
-    Peripheral, interrupt::typelevel::Binding
+    interrupt::typelevel::Binding,
+    pio::{Config, Instance, InterruptHandler, Pio, PioPin, ShiftConfig, ShiftDirection::Left},
+    Peripheral,
 };
 #[allow(dead_code)]
-pub struct DshotPio<'a, const N : usize, PIO : Instance> {
-    pio_instance: Pio<'a,PIO>,
+pub struct DshotPio<'a, const N: usize, PIO: Instance> {
+    pio_instance: Pio<'a, PIO>,
 }
 
-
-fn configure_pio_instance<'a,PIO: Instance>  (
+fn configure_pio_instance<'a, PIO: Instance>(
     pio: impl Peripheral<P = PIO> + 'a,
     irq: impl Binding<PIO::Interrupt, InterruptHandler<PIO>>,
     clk_div: (u16, u8),
 ) -> (Config<'a, PIO>, Pio<'a, PIO>) {
-    
     // Define program
     let dshot_pio_program = pio_proc::pio_asm!(
         "set pindirs, 1",
@@ -46,7 +45,7 @@ fn configure_pio_instance<'a,PIO: Instance>  (
 
     // Configure program
     let mut cfg = Config::default();
-    let mut pio = Pio::new(pio,irq);
+    let mut pio = Pio::new(pio, irq);
     cfg.use_program(&pio.common.load_program(&dshot_pio_program.program), &[]);
     cfg.clock_divider = clk_div.0.into();
 
@@ -62,22 +61,20 @@ fn configure_pio_instance<'a,PIO: Instance>  (
         threshold: Default::default(),
     };
 
-    (cfg,pio)
-
+    (cfg, pio)
 }
 
 ///
 /// Defining constructor functions
-/// 
+///
 
-impl <'a,PIO: Instance> DshotPio<'a,1,PIO> {
+impl<'a, PIO: Instance> DshotPio<'a, 1, PIO> {
     pub fn new(
         pio: impl Peripheral<P = PIO> + 'a,
         irq: impl Binding<PIO::Interrupt, InterruptHandler<PIO>>,
         pin0: impl PioPin,
         clk_div: (u16, u8),
-    ) -> DshotPio<'a,1,PIO> {
-
+    ) -> DshotPio<'a, 1, PIO> {
         let (mut cfg, mut pio) = configure_pio_instance(pio, irq, clk_div);
 
         // Set pins and enable all state machines
@@ -87,19 +84,18 @@ impl <'a,PIO: Instance> DshotPio<'a,1,PIO> {
         pio.sm0.set_enable(true);
 
         // Return struct of 1 configured DShot state machine
-        DshotPio { pio_instance : pio }
+        DshotPio { pio_instance: pio }
     }
 }
 
-impl <'a,PIO: Instance> DshotPio<'a,2,PIO> {
+impl<'a, PIO: Instance> DshotPio<'a, 2, PIO> {
     pub fn new(
         pio: impl Peripheral<P = PIO> + 'a,
         irq: impl Binding<PIO::Interrupt, InterruptHandler<PIO>>,
         pin0: impl PioPin,
         pin1: impl PioPin,
         clk_div: (u16, u8),
-    ) -> DshotPio<'a,2,PIO> {
-
+    ) -> DshotPio<'a, 2, PIO> {
         let (mut cfg, mut pio) = configure_pio_instance(pio, irq, clk_div);
 
         // Set pins and enable all state machines
@@ -114,11 +110,11 @@ impl <'a,PIO: Instance> DshotPio<'a,2,PIO> {
         pio.sm1.set_enable(true);
 
         // Return struct of 2 configured DShot state machines
-        DshotPio { pio_instance : pio }
+        DshotPio { pio_instance: pio }
     }
 }
 
-impl <'a,PIO: Instance> DshotPio<'a,3,PIO> {
+impl<'a, PIO: Instance> DshotPio<'a, 3, PIO> {
     pub fn new(
         pio: impl Peripheral<P = PIO> + 'a,
         irq: impl Binding<PIO::Interrupt, InterruptHandler<PIO>>,
@@ -126,8 +122,7 @@ impl <'a,PIO: Instance> DshotPio<'a,3,PIO> {
         pin1: impl PioPin,
         pin2: impl PioPin,
         clk_div: (u16, u8),
-    ) -> DshotPio<'a,3,PIO> {
-
+    ) -> DshotPio<'a, 3, PIO> {
         let (mut cfg, mut pio) = configure_pio_instance(pio, irq, clk_div);
 
         // Set pins and enable all state machines
@@ -145,13 +140,13 @@ impl <'a,PIO: Instance> DshotPio<'a,3,PIO> {
         cfg.set_set_pins(&[&pin2]);
         pio.sm2.set_config(&cfg);
         pio.sm2.set_enable(true);
-        
+
         // Return struct of 3 configured DShot state machines
-        DshotPio { pio_instance : pio }
+        DshotPio { pio_instance: pio }
     }
 }
 
-impl <'a,PIO: Instance> DshotPio<'a,4,PIO> {
+impl<'a, PIO: Instance> DshotPio<'a, 4, PIO> {
     pub fn new(
         pio: impl Peripheral<P = PIO> + 'a,
         irq: impl Binding<PIO::Interrupt, InterruptHandler<PIO>>,
@@ -160,8 +155,7 @@ impl <'a,PIO: Instance> DshotPio<'a,4,PIO> {
         pin2: impl PioPin,
         pin3: impl PioPin,
         clk_div: (u16, u8),
-    ) -> DshotPio<'a,4,PIO> {
-
+    ) -> DshotPio<'a, 4, PIO> {
         let (mut cfg, mut pio) = configure_pio_instance(pio, irq, clk_div);
 
         // Set pins and enable all state machines
@@ -186,134 +180,220 @@ impl <'a,PIO: Instance> DshotPio<'a,4,PIO> {
         pio.sm3.set_enable(true);
 
         // Return struct of 4 configured DShot state machines
-        DshotPio { pio_instance : pio }
+        DshotPio { pio_instance: pio }
     }
 }
 
 ///
 /// Implementing DshotPioTrait
-/// 
+///
 
-impl <'d,PIO : Instance> super::DshotPioTrait<1> for DshotPio<'d,1,PIO> {
-    
+impl<'d, PIO: Instance> super::DshotPioTrait<1> for DshotPio<'d, 1, PIO> {
     /// Send any valid DShot value to the ESC.
     fn command(&mut self, command: [u16; 1]) {
-        if self.pio_instance.sm0.tx().write_ready() {
+        if !self.pio_instance.sm0.tx().full() {
             self.pio_instance.sm0.tx().push(command[0] as u32);
         }
     }
-    
+
     /// Set the direction of rotation for each motor
-    fn reverse(&mut self, reverse: [bool;1]) {
-        self.pio_instance.sm0.tx().push(dshot::reverse(reverse[0]) as u32);
+    fn reverse(&mut self, reverse: [bool; 1]) {
+        self.pio_instance
+            .sm0
+            .tx()
+            .push(dshot::reverse(reverse[0]) as u32);
     }
 
     /// Set the throttle for each motor. All values are clamped between 48 and 2047
-    fn throttle_clamp(&mut self, throttle: [u16;1]) {
-        self.pio_instance.sm0.tx().push(dshot::throttle_clamp(throttle[0], false) as u32);
+    fn throttle_clamp(&mut self, throttle: [u16; 1]) {
+        self.pio_instance
+            .sm0
+            .tx()
+            .push(dshot::throttle_clamp(throttle[0], false) as u32);
     }
 
     /// Set the throttle for each motor to zero (DShot command 48)
     fn throttle_minimum(&mut self) {
-        self.pio_instance.sm0.tx().push(dshot::throttle_minimum(false) as u32);
+        self.pio_instance
+            .sm0
+            .tx()
+            .push(dshot::throttle_minimum(false) as u32);
     }
 }
 
-impl <'d,PIO : Instance> super::DshotPioTrait<2> for DshotPio<'d,2,PIO> {
-    
+impl<'d, PIO: Instance> super::DshotPioTrait<2> for DshotPio<'d, 2, PIO> {
     /// Send any valid DShot value to the ESC.
     fn command(&mut self, command: [u16; 2]) {
-        if self.pio_instance.sm0.tx().write_ready() {
+        if !self.pio_instance.sm0.tx().full() {
             self.pio_instance.sm0.tx().push(command[0] as u32);
             self.pio_instance.sm1.tx().push(command[1] as u32);
         }
     }
-    
+
     /// Set the direction of rotation for each motor
-    fn reverse(&mut self, reverse: [bool;2]) {
-        self.pio_instance.sm0.tx().push(dshot::reverse(reverse[0]) as u32);
-        self.pio_instance.sm1.tx().push(dshot::reverse(reverse[1]) as u32);
+    fn reverse(&mut self, reverse: [bool; 2]) {
+        self.pio_instance
+            .sm0
+            .tx()
+            .push(dshot::reverse(reverse[0]) as u32);
+        self.pio_instance
+            .sm1
+            .tx()
+            .push(dshot::reverse(reverse[1]) as u32);
     }
 
     /// Set the throttle for each motor. All values are clamped between 48 and 2047
-    fn throttle_clamp(&mut self, throttle: [u16;2]) {
-        self.pio_instance.sm0.tx().push(dshot::throttle_clamp(throttle[0], false) as u32);
-        self.pio_instance.sm1.tx().push(dshot::throttle_clamp(throttle[1], false) as u32);
+    fn throttle_clamp(&mut self, throttle: [u16; 2]) {
+        self.pio_instance
+            .sm0
+            .tx()
+            .push(dshot::throttle_clamp(throttle[0], false) as u32);
+        self.pio_instance
+            .sm1
+            .tx()
+            .push(dshot::throttle_clamp(throttle[1], false) as u32);
     }
 
     /// Set the throttle for each motor to zero (DShot command 48)
     fn throttle_minimum(&mut self) {
-        self.pio_instance.sm0.tx().push(dshot::throttle_minimum(false) as u32);
-        self.pio_instance.sm1.tx().push(dshot::throttle_minimum(false) as u32);
+        self.pio_instance
+            .sm0
+            .tx()
+            .push(dshot::throttle_minimum(false) as u32);
+        self.pio_instance
+            .sm1
+            .tx()
+            .push(dshot::throttle_minimum(false) as u32);
     }
 }
 
-impl <'d,PIO : Instance> super::DshotPioTrait<3> for DshotPio<'d,3,PIO> {
-    
+impl<'d, PIO: Instance> super::DshotPioTrait<3> for DshotPio<'d, 3, PIO> {
     /// Send any valid DShot value to the ESC.
     fn command(&mut self, command: [u16; 3]) {
-        if self.pio_instance.sm0.tx().write_ready() {
+        if !self.pio_instance.sm0.tx().full() {
             self.pio_instance.sm0.tx().push(command[0] as u32);
             self.pio_instance.sm1.tx().push(command[1] as u32);
             self.pio_instance.sm2.tx().push(command[2] as u32);
         }
     }
-    
+
     /// Set the direction of rotation for each motor
-    fn reverse(&mut self, reverse: [bool;3]) {
-        self.pio_instance.sm0.tx().push(dshot::reverse(reverse[0]) as u32);
-        self.pio_instance.sm1.tx().push(dshot::reverse(reverse[1]) as u32);
-        self.pio_instance.sm2.tx().push(dshot::reverse(reverse[2]) as u32);
+    fn reverse(&mut self, reverse: [bool; 3]) {
+        self.pio_instance
+            .sm0
+            .tx()
+            .push(dshot::reverse(reverse[0]) as u32);
+        self.pio_instance
+            .sm1
+            .tx()
+            .push(dshot::reverse(reverse[1]) as u32);
+        self.pio_instance
+            .sm2
+            .tx()
+            .push(dshot::reverse(reverse[2]) as u32);
     }
 
     /// Set the throttle for each motor. All values are clamped between 48 and 2047
-    fn throttle_clamp(&mut self, throttle: [u16;3]) {
-        self.pio_instance.sm0.tx().push(dshot::throttle_clamp(throttle[0], false) as u32);
-        self.pio_instance.sm1.tx().push(dshot::throttle_clamp(throttle[1], false) as u32);
-        self.pio_instance.sm2.tx().push(dshot::throttle_clamp(throttle[2], false) as u32);
+    fn throttle_clamp(&mut self, throttle: [u16; 3]) {
+        self.pio_instance
+            .sm0
+            .tx()
+            .push(dshot::throttle_clamp(throttle[0], false) as u32);
+        self.pio_instance
+            .sm1
+            .tx()
+            .push(dshot::throttle_clamp(throttle[1], false) as u32);
+        self.pio_instance
+            .sm2
+            .tx()
+            .push(dshot::throttle_clamp(throttle[2], false) as u32);
     }
 
     /// Set the throttle for each motor to zero (DShot command 48)
     fn throttle_minimum(&mut self) {
-        self.pio_instance.sm0.tx().push(dshot::throttle_minimum(false) as u32);
-        self.pio_instance.sm1.tx().push(dshot::throttle_minimum(false) as u32);
-        self.pio_instance.sm2.tx().push(dshot::throttle_minimum(false) as u32);
+        self.pio_instance
+            .sm0
+            .tx()
+            .push(dshot::throttle_minimum(false) as u32);
+        self.pio_instance
+            .sm1
+            .tx()
+            .push(dshot::throttle_minimum(false) as u32);
+        self.pio_instance
+            .sm2
+            .tx()
+            .push(dshot::throttle_minimum(false) as u32);
     }
 }
 
-impl <'d,PIO : Instance> super::DshotPioTrait<4 > for DshotPio<'d,4,PIO> {
-    
+impl<'d, PIO: Instance> super::DshotPioTrait<4> for DshotPio<'d, 4, PIO> {
     /// Send any valid DShot value to the ESC.
     fn command(&mut self, command: [u16; 4]) {
-        if self.pio_instance.sm0.tx().write_ready() {
+        if !self.pio_instance.sm0.tx().full() {
             self.pio_instance.sm0.tx().push(command[0] as u32);
             self.pio_instance.sm1.tx().push(command[1] as u32);
             self.pio_instance.sm2.tx().push(command[2] as u32);
             self.pio_instance.sm3.tx().push(command[3] as u32);
         }
     }
-    
+
     /// Set the direction of rotation for each motor
-    fn reverse(&mut self, reverse: [bool;4]) {
-        self.pio_instance.sm0.tx().push(dshot::reverse(reverse[0]) as u32);
-        self.pio_instance.sm1.tx().push(dshot::reverse(reverse[1]) as u32);
-        self.pio_instance.sm2.tx().push(dshot::reverse(reverse[2]) as u32);
-        self.pio_instance.sm3.tx().push(dshot::reverse(reverse[3]) as u32);
+    fn reverse(&mut self, reverse: [bool; 4]) {
+        self.pio_instance
+            .sm0
+            .tx()
+            .push(dshot::reverse(reverse[0]) as u32);
+        self.pio_instance
+            .sm1
+            .tx()
+            .push(dshot::reverse(reverse[1]) as u32);
+        self.pio_instance
+            .sm2
+            .tx()
+            .push(dshot::reverse(reverse[2]) as u32);
+        self.pio_instance
+            .sm3
+            .tx()
+            .push(dshot::reverse(reverse[3]) as u32);
     }
 
     /// Set the throttle for each motor. All values are clamped between 48 and 2047
-    fn throttle_clamp(&mut self, throttle: [u16;4]) {
-        self.pio_instance.sm0.tx().push(dshot::throttle_clamp(throttle[0], false) as u32);
-        self.pio_instance.sm1.tx().push(dshot::throttle_clamp(throttle[1], false) as u32);
-        self.pio_instance.sm2.tx().push(dshot::throttle_clamp(throttle[2], false) as u32);
-        self.pio_instance.sm3.tx().push(dshot::throttle_clamp(throttle[3], false) as u32);
+    fn throttle_clamp(&mut self, throttle: [u16; 4]) {
+        self.pio_instance
+            .sm0
+            .tx()
+            .push(dshot::throttle_clamp(throttle[0], false) as u32);
+        self.pio_instance
+            .sm1
+            .tx()
+            .push(dshot::throttle_clamp(throttle[1], false) as u32);
+        self.pio_instance
+            .sm2
+            .tx()
+            .push(dshot::throttle_clamp(throttle[2], false) as u32);
+        self.pio_instance
+            .sm3
+            .tx()
+            .push(dshot::throttle_clamp(throttle[3], false) as u32);
     }
 
     /// Set the throttle for each motor to zero (DShot command 48)
     fn throttle_minimum(&mut self) {
-        self.pio_instance.sm0.tx().push(dshot::throttle_minimum(false) as u32);
-        self.pio_instance.sm1.tx().push(dshot::throttle_minimum(false) as u32);
-        self.pio_instance.sm2.tx().push(dshot::throttle_minimum(false) as u32);
-        self.pio_instance.sm3.tx().push(dshot::throttle_minimum(false) as u32);
+        self.pio_instance
+            .sm0
+            .tx()
+            .push(dshot::throttle_minimum(false) as u32);
+        self.pio_instance
+            .sm1
+            .tx()
+            .push(dshot::throttle_minimum(false) as u32);
+        self.pio_instance
+            .sm2
+            .tx()
+            .push(dshot::throttle_minimum(false) as u32);
+        self.pio_instance
+            .sm3
+            .tx()
+            .push(dshot::throttle_minimum(false) as u32);
     }
 }
