@@ -198,7 +198,9 @@ impl <'d,PIO : Instance> super::DshotPioTrait<1> for DshotPio<'d,1,PIO> {
     
     /// Send any valid DShot value to the ESC.
     fn command(&mut self, command: [u16; 1]) {
-        self.pio_instance.sm0.tx().push(command[0] as u32);
+        if self.pio_instance.sm0.tx().write_ready() {
+            self.pio_instance.sm0.tx().push(command[0] as u32);
+        }
     }
     
     /// Set the direction of rotation for each motor
@@ -221,8 +223,10 @@ impl <'d,PIO : Instance> super::DshotPioTrait<2> for DshotPio<'d,2,PIO> {
     
     /// Send any valid DShot value to the ESC.
     fn command(&mut self, command: [u16; 2]) {
-        self.pio_instance.sm0.tx().push(command[0] as u32);
-        self.pio_instance.sm1.tx().push(command[1] as u32);
+        if self.pio_instance.sm0.tx().write_ready() {
+            self.pio_instance.sm0.tx().push(command[0] as u32);
+            self.pio_instance.sm1.tx().push(command[1] as u32);
+        }
     }
     
     /// Set the direction of rotation for each motor
@@ -248,9 +252,11 @@ impl <'d,PIO : Instance> super::DshotPioTrait<3> for DshotPio<'d,3,PIO> {
     
     /// Send any valid DShot value to the ESC.
     fn command(&mut self, command: [u16; 3]) {
-        self.pio_instance.sm0.tx().push(command[0] as u32);
-        self.pio_instance.sm1.tx().push(command[1] as u32);
-        self.pio_instance.sm2.tx().push(command[2] as u32);
+        if self.pio_instance.sm0.tx().write_ready() {
+            self.pio_instance.sm0.tx().push(command[0] as u32);
+            self.pio_instance.sm1.tx().push(command[1] as u32);
+            self.pio_instance.sm2.tx().push(command[2] as u32);
+        }
     }
     
     /// Set the direction of rotation for each motor
@@ -279,10 +285,12 @@ impl <'d,PIO : Instance> super::DshotPioTrait<4 > for DshotPio<'d,4,PIO> {
     
     /// Send any valid DShot value to the ESC.
     fn command(&mut self, command: [u16; 4]) {
-        self.pio_instance.sm0.tx().push(command[0] as u32);
-        self.pio_instance.sm1.tx().push(command[1] as u32);
-        self.pio_instance.sm2.tx().push(command[2] as u32);
-        self.pio_instance.sm3.tx().push(command[3] as u32);
+        if self.pio_instance.sm0.tx().write_ready() {
+            self.pio_instance.sm0.tx().push(command[0] as u32);
+            self.pio_instance.sm1.tx().push(command[1] as u32);
+            self.pio_instance.sm2.tx().push(command[2] as u32);
+            self.pio_instance.sm3.tx().push(command[3] as u32);
+        }
     }
     
     /// Set the direction of rotation for each motor
