@@ -17,7 +17,7 @@ fn configure_pio_instance<'a, PIO: Instance>(
     clk_div: (u16, u8),
 ) -> (Config<'a, PIO>, Pio<'a, PIO>) {
     // Define program
-    let dshot_pio_program = pio_proc::pio_asm!(
+    let dshot_pio_program = embassy_rp::pio::program::pio_asm!(
         "set pindirs, 1",
         "entry:"
         "   pull"
@@ -46,7 +46,10 @@ fn configure_pio_instance<'a, PIO: Instance>(
     // Configure program
     let mut cfg = Config::default();
     let mut pio = Pio::new(pio, irq);
-    cfg.use_program(&pio.common.load_program(&dshot_pio_program.program), &[]);
+    cfg.use_program(
+        &pio.common.load_program(&dshot_pio_program.program.into()),
+        &[],
+    );
     cfg.clock_divider = clk_div.0.into();
 
     cfg.shift_in = ShiftConfig {
