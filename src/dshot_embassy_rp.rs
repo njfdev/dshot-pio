@@ -4,7 +4,7 @@ use dshot_encoder as dshot;
 use embassy_rp::{
     interrupt::typelevel::Binding,
     pio::{Config, Instance, InterruptHandler, Pio, PioPin, ShiftConfig, ShiftDirection::Left},
-    Peripheral,
+    Peri,
 };
 #[allow(dead_code)]
 pub struct DshotPio<'a, const N: usize, PIO: Instance> {
@@ -12,7 +12,7 @@ pub struct DshotPio<'a, const N: usize, PIO: Instance> {
 }
 
 fn configure_pio_instance<'a, PIO: Instance>(
-    pio: impl Peripheral<P = PIO> + 'a,
+    pio: Peri<'a, PIO>,
     irq: impl Binding<PIO::Interrupt, InterruptHandler<PIO>>,
     clk_div: (u16, u8),
 ) -> (Config<'a, PIO>, Pio<'a, PIO>) {
@@ -73,9 +73,9 @@ fn configure_pio_instance<'a, PIO: Instance>(
 
 impl<'a, PIO: Instance> DshotPio<'a, 1, PIO> {
     pub fn new(
-        pio: impl Peripheral<P = PIO> + 'a,
+        pio: Peri<'a, PIO>,
         irq: impl Binding<PIO::Interrupt, InterruptHandler<PIO>>,
-        pin0: impl PioPin,
+        pin0: Peri<'a, impl PioPin>,
         clk_div: (u16, u8),
     ) -> DshotPio<'a, 1, PIO> {
         let (mut cfg, mut pio) = configure_pio_instance(pio, irq, clk_div);
@@ -93,10 +93,10 @@ impl<'a, PIO: Instance> DshotPio<'a, 1, PIO> {
 
 impl<'a, PIO: Instance> DshotPio<'a, 2, PIO> {
     pub fn new(
-        pio: impl Peripheral<P = PIO> + 'a,
+        pio: Peri<'a, PIO>,
         irq: impl Binding<PIO::Interrupt, InterruptHandler<PIO>>,
-        pin0: impl PioPin,
-        pin1: impl PioPin,
+        pin0: Peri<'a, impl PioPin>,
+        pin1: Peri<'a, impl PioPin>,
         clk_div: (u16, u8),
     ) -> DshotPio<'a, 2, PIO> {
         let (mut cfg, mut pio) = configure_pio_instance(pio, irq, clk_div);
@@ -119,11 +119,11 @@ impl<'a, PIO: Instance> DshotPio<'a, 2, PIO> {
 
 impl<'a, PIO: Instance> DshotPio<'a, 3, PIO> {
     pub fn new(
-        pio: impl Peripheral<P = PIO> + 'a,
+        pio: Peri<'a, PIO>,
         irq: impl Binding<PIO::Interrupt, InterruptHandler<PIO>>,
-        pin0: impl PioPin,
-        pin1: impl PioPin,
-        pin2: impl PioPin,
+        pin0: Peri<'a, impl PioPin>,
+        pin1: Peri<'a, impl PioPin>,
+        pin2: Peri<'a, impl PioPin>,
         clk_div: (u16, u8),
     ) -> DshotPio<'a, 3, PIO> {
         let (mut cfg, mut pio) = configure_pio_instance(pio, irq, clk_div);
@@ -151,12 +151,12 @@ impl<'a, PIO: Instance> DshotPio<'a, 3, PIO> {
 
 impl<'a, PIO: Instance> DshotPio<'a, 4, PIO> {
     pub fn new(
-        pio: impl Peripheral<P = PIO> + 'a,
+        pio: Peri<'a, PIO>,
         irq: impl Binding<PIO::Interrupt, InterruptHandler<PIO>>,
-        pin0: impl PioPin,
-        pin1: impl PioPin,
-        pin2: impl PioPin,
-        pin3: impl PioPin,
+        pin0: Peri<'a, impl PioPin>,
+        pin1: Peri<'a, impl PioPin>,
+        pin2: Peri<'a, impl PioPin>,
+        pin3: Peri<'a, impl PioPin>,
         clk_div: (u16, u8),
     ) -> DshotPio<'a, 4, PIO> {
         let (mut cfg, mut pio) = configure_pio_instance(pio, irq, clk_div);
